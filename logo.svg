@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" width="900" height="400">
+  <defs>
+    <linearGradient id="fire" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff5500"/>
+      <stop offset="100%" style="stop-color:#cc2200"/>
+    </linearGradient>
+    <linearGradient id="steel" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#dddddd"/>
+      <stop offset="100%" style="stop-color:#999999"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="ember">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="400" fill="#0a0a0a" rx="16"/>
+
+  <!-- Top/bottom fire bars -->
+  <rect x="35" y="22" width="830" height="3" fill="url(#fire)" rx="1.5"/>
+  <rect x="35" y="375" width="830" height="3" fill="url(#fire)" rx="1.5"/>
+
+  <!-- Corner bolts -->
+  <g fill="#444" stroke="#222" stroke-width="1.5">
+    <circle cx="48" cy="35" r="5"/><circle cx="48" cy="35" r="1.8" fill="#111"/>
+    <circle cx="852" cy="35" r="5"/><circle cx="852" cy="35" r="1.8" fill="#111"/>
+    <circle cx="48" cy="365" r="5"/><circle cx="48" cy="365" r="1.8" fill="#111"/>
+    <circle cx="852" cy="365" r="5"/><circle cx="852" cy="365" r="1.8" fill="#111"/>
+  </g>
+
+  <!-- MARAUDER - drawn as blocky pixel-style letters -->
+  <g fill="url(#fire)" filter="url(#glow)" transform="translate(65, 60)">
+    <!-- Each letter is on a ~95px wide grid, height ~140px -->
+    <!-- Using 12px blocks for that chunky pixel feel -->
+
+    <!-- M -->
+    <g transform="translate(0,0)">
+      <rect x="0" y="0" width="14" height="140"/>
+      <rect x="14" y="0" width="14" height="28"/>
+      <rect x="28" y="14" width="14" height="28"/>
+      <rect x="42" y="28" width="14" height="28"/>
+      <rect x="56" y="14" width="14" height="28"/>
+      <rect x="70" y="0" width="14" height="28"/>
+      <rect x="84" y="0" width="14" height="140"/>
+    </g>
+
+    <!-- A -->
+    <g transform="translate(115,0)">
+      <rect x="28" y="0" width="28" height="14"/>
+      <rect x="14" y="14" width="14" height="28"/>
+      <rect x="56" y="14" width="14" height="28"/>
+      <rect x="0" y="42" width="14" height="98"/>
+      <rect x="70" y="42" width="14" height="98"/>
+      <rect x="14" y="70" width="56" height="14"/>
+    </g>
+
+    <!-- R -->
+    <g transform="translate(210,0)">
+      <rect x="0" y="0" width="14" height="140"/>
+      <rect x="14" y="0" width="56" height="14"/>
+      <rect x="70" y="14" width="14" height="42"/>
+      <rect x="14" y="56" width="56" height="14"/>
+      <rect x="42" y="70" width="14" height="14"/>
+      <rect x="56" y="84" width="14" height="14"/>
+      <rect x="70" y="98" width="14" height="42"/>
+    </g>
+
+    <!-- A -->
+    <g transform="translate(305,0)">
+      <rect x="28" y="0" width="28" height="14"/>
+      <rect x="14" y="14" width="14" height="28"/>
+      <rect x="56" y="14" width="14" height="28"/>
+      <rect x="0" y="42" width="14" height="98"/>
+      <rect x="70" y="42" width="14" height="98"/>
+      <rect x="14" y="70" width="56" height="14"/>
+    </g>
+
+    <!-- U -->
+    <g transform="translate(400,0)">
+      <rect x="0" y="0" width="14" height="126"/>
+      <rect x="70" y="0" width="14" height="126"/>
+      <rect x="14" y="126" width="56" height="14"/>
+    </g>
+
+    <!-- D -->
+    <g transform="translate(495,0)">
+      <rect x="0" y="0" width="14" height="140"/>
+      <rect x="14" y="0" width="42" height="14"/>
+      <rect x="56" y="14" width="14" height="14"/>
+      <rect x="70" y="28" width="14" height="84"/>
+      <rect x="56" y="112" width="14" height="14"/>
+      <rect x="14" y="126" width="42" height="14"/>
+    </g>
+
+    <!-- E -->
+    <g transform="translate(590,0)">
+      <rect x="0" y="0" width="14" height="140"/>
+      <rect x="14" y="0" width="70" height="14"/>
+      <rect x="14" y="63" width="56" height="14"/>
+      <rect x="14" y="126" width="70" height="14"/>
+    </g>
+
+    <!-- R -->
+    <g transform="translate(685,0)">
+      <rect x="0" y="0" width="14" height="140"/>
+      <rect x="14" y="0" width="56" height="14"/>
+      <rect x="70" y="14" width="14" height="42"/>
+      <rect x="14" y="56" width="56" height="14"/>
+      <rect x="42" y="70" width="14" height="14"/>
+      <rect x="56" y="84" width="14" height="14"/>
+      <rect x="70" y="98" width="14" height="42"/>
+    </g>
+  </g>
+
+  <!-- CODE subtitle -->
+  <text x="450" y="250" font-family="'Courier New','Lucida Console',monospace" font-size="26"
+        fill="url(#steel)" text-anchor="middle" letter-spacing="20" font-weight="bold">C O D E</text>
+
+  <!-- Tagline -->
+  <text x="450" y="300" font-family="'Courier New',monospace" font-size="14" fill="#666"
+        text-anchor="middle" font-style="italic">"By my deeds, I honor him." -mkdir</text>
+
+  <!-- Bottom line -->
+  <text x="450" y="345" font-family="'Courier New',monospace" font-size="12" fill="#444"
+        text-anchor="middle" letter-spacing="3">fuel your projects. burn the rest.</text>
+</svg>

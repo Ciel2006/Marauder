@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" width="900" height="340">
+  <rect width="900" height="340" fill="#0a0a0a" rx="12"/>
+
+  <!-- Title -->
+  <text x="450" y="38" font-family="'Courier New',monospace" font-size="16" fill="#ff5500" text-anchor="middle" font-weight="bold">Why Marauder?</text>
+
+  <!-- Table header -->
+  <rect x="30" y="55" width="840" height="32" rx="4" fill="#1a1a1a"/>
+  <text x="160" y="76" font-family="'Courier New',monospace" font-size="13" fill="#ccc" text-anchor="middle"></text>
+  <text x="390" y="76" font-family="'Courier New',monospace" font-size="13" fill="#ff5500" text-anchor="middle">Marauder</text>
+  <text x="580" y="76" font-family="'Courier New',monospace" font-size="13" fill="#888" text-anchor="middle">Claude Code</text>
+  <text x="770" y="76" font-family="'Courier New',monospace" font-size="13" fill="#888" text-anchor="middle">Codex CLI</text>
+
+  <!-- Divider -->
+  <line x1="30" y1="90" x2="870" y2="90" stroke="#333" stroke-width="1"/>
+
+  <!-- Row 1: Cost -->
+  <text x="160" y="118" font-family="'Courier New',monospace" font-size="12" fill="#aaa" text-anchor="middle">Cost</text>
+  <text x="390" y="118" font-family="'Courier New',monospace" font-size="12" fill="#44cc44" text-anchor="middle">Free (bring your API)</text>
+  <text x="580" y="118" font-family="'Courier New',monospace" font-size="12" fill="#cc6666" text-anchor="middle">$20/mo subscription</text>
+  <text x="770" y="118" font-family="'Courier New',monospace" font-size="12" fill="#ccaa44" text-anchor="middle">API costs</text>
+  <line x1="30" y1="130" x2="870" y2="130" stroke="#1a1a1a" stroke-width="1"/>
+
+  <!-- Row 2: Model lock-in -->
+  <text x="160" y="155" font-family="'Courier New',monospace" font-size="12" fill="#aaa" text-anchor="middle">Model choice</text>
+  <text x="390" y="155" font-family="'Courier New',monospace" font-size="12" fill="#44cc44" text-anchor="middle">Any model, any API</text>
+  <text x="580" y="155" font-family="'Courier New',monospace" font-size="12" fill="#cc6666" text-anchor="middle">Claude only</text>
+  <text x="770" y="155" font-family="'Courier New',monospace" font-size="12" fill="#cc6666" text-anchor="middle">OpenAI only</text>
+  <line x1="30" y1="167" x2="870" y2="167" stroke="#1a1a1a" stroke-width="1"/>
+
+  <!-- Row 3: Setup -->
+  <text x="160" y="192" font-family="'Courier New',monospace" font-size="12" fill="#aaa" text-anchor="middle">Setup</text>
+  <text x="390" y="192" font-family="'Courier New',monospace" font-size="12" fill="#44cc44" text-anchor="middle">python install.py</text>
+  <text x="580" y="192" font-family="'Courier New',monospace" font-size="12" fill="#ccaa44" text-anchor="middle">npm install</text>
+  <text x="770" y="192" font-family="'Courier New',monospace" font-size="12" fill="#ccaa44" text-anchor="middle">npm install</text>
+  <line x1="30" y1="204" x2="870" y2="204" stroke="#1a1a1a" stroke-width="1"/>
+
+  <!-- Row 4: Dependencies -->
+  <text x="160" y="229" font-family="'Courier New',monospace" font-size="12" fill="#aaa" text-anchor="middle">Dependencies</text>
+  <text x="390" y="229" font-family="'Courier New',monospace" font-size="12" fill="#44cc44" text-anchor="middle">3 packages</text>
+  <text x="580" y="229" font-family="'Courier New',monospace" font-size="12" fill="#cc6666" text-anchor="middle">Heavy</text>
+  <text x="770" y="229" font-family="'Courier New',monospace" font-size="12" fill="#ccaa44" text-anchor="middle">Medium</text>
+  <line x1="30" y1="241" x2="870" y2="241" stroke="#1a1a1a" stroke-width="1"/>
+
+  <!-- Row 5: Open source -->
+  <text x="160" y="266" font-family="'Courier New',monospace" font-size="12" fill="#aaa" text-anchor="middle">Open source</text>
+  <text x="390" y="266" font-family="'Courier New',monospace" font-size="12" fill="#44cc44" text-anchor="middle">Yes — MIT</text>
+  <text x="580" y="266" font-family="'Courier New',monospace" font-size="12" fill="#cc6666" text-anchor="middle">No</text>
+  <text x="770" y="266" font-family="'Courier New',monospace" font-size="12" fill="#44cc44" text-anchor="middle">Yes</text>
+  <line x1="30" y1="278" x2="870" y2="278" stroke="#1a1a1a" stroke-width="1"/>
+
+  <!-- Row 6: Philosophy -->
+  <text x="160" y="303" font-family="'Courier New',monospace" font-size="12" fill="#aaa" text-anchor="middle">Philosophy</text>
+  <text x="390" y="303" font-family="'Courier New',monospace" font-size="12" fill="#44cc44" text-anchor="middle">Fast and simple</text>
+  <text x="580" y="303" font-family="'Courier New',monospace" font-size="12" fill="#888" text-anchor="middle">Feature-rich</text>
+  <text x="770" y="303" font-family="'Courier New',monospace" font-size="12" fill="#888" text-anchor="middle">Feature-rich</text>
+
+  <!-- Bottom line -->
+  <text x="450" y="332" font-family="'Courier New',monospace" font-size="10" fill="#444" text-anchor="middle">Marauder doesn't try to be everything. It tries to be fast.</text>
+</svg>

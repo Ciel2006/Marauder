@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 220" width="900" height="220">
+  <defs>
+    <linearGradient id="orange" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6633"/>
+      <stop offset="100%" style="stop-color:#cc3300"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="900" height="220" fill="#0a0a0a" rx="12"/>
+
+  <!-- Step 1: You -->
+  <rect x="30" y="50" width="160" height="120" rx="10" fill="none" stroke="#ff5500" stroke-width="2"/>
+  <text x="110" y="90" font-family="'Courier New',monospace" font-size="28" fill="#ff5500" text-anchor="middle">You</text>
+  <text x="110" y="118" font-family="'Courier New',monospace" font-size="12" fill="#888" text-anchor="middle">Type a prompt</text>
+  <text x="110" y="136" font-family="'Courier New',monospace" font-size="12" fill="#888" text-anchor="middle">in your terminal</text>
+
+  <!-- Arrow 1 -->
+  <line x1="200" y1="110" x2="260" y2="110" stroke="#555" stroke-width="2"/>
+  <polygon points="260,104 275,110 260,116" fill="#555"/>
+
+  <!-- Step 2: Marauder -->
+  <rect x="280" y="50" width="160" height="120" rx="10" fill="none" stroke="#ff5500" stroke-width="2"/>
+  <text x="360" y="86" font-family="'Courier New',monospace" font-size="20" fill="#ff5500" text-anchor="middle">Marauder</text>
+  <text x="360" y="112" font-family="'Courier New',monospace" font-size="12" fill="#888" text-anchor="middle">Sends to your</text>
+  <text x="360" y="130" font-family="'Courier New',monospace" font-size="12" fill="#888" text-anchor="middle">API + model</text>
+  <text x="360" y="148" font-family="'Courier New',monospace" font-size="12" fill="#888" text-anchor="middle">of choice</text>
+
+  <!-- Arrow 2 -->
+  <line x1="450" y1="110" x2="510" y2="110" stroke="#555" stroke-width="2"/>
+  <polygon points="510,104 525,110 510,116" fill="#555"/>
+
+  <!-- Step 3: AI -->
+  <rect x="530" y="50" width="160" height="120" rx="10" fill="none" stroke="#ff5500" stroke-width="2"/>
+  <text x="610" y="86" font-family="'Courier New',monospace" font-size="20" fill="#ff5500" text-anchor="middle">AI Model</text>
+  <text x="610" y="112" font-family="'Courier New',monospace" font-size="12" fill="#888" text-anchor="middle">Thinks, plans,</text>
+  <text x="610" y="130" font-family="'Courier New',monospace" font-size="12" fill="#888" text-anchor="middle">calls tools to</text>
+  <text x="610" y="148" font-family="'Courier New',monospace" font-size="12" fill="#888" text-anchor="middle">read/write/edit</text>
+
+  <!-- Arrow 3 -->
+  <line x1="700" y1="110" x2="710" y2="110" stroke="#555" stroke-width="2"/>
+  <polygon points="710,104 725,110 710,116" fill="#555"/>
+
+  <!-- Step 4: Your Code -->
+  <rect x="730" y="50" width="140" height="120" rx="10" fill="none" stroke="#ff5500" stroke-width="2"/>
+  <text x="800" y="86" font-family="'Courier New',monospace" font-size="16" fill="#ff5500" text-anchor="middle">Your Code</text>
+  <text x="800" y="112" font-family="'Courier New',monospace" font-size="12" fill="#888" text-anchor="middle">Files created</text>
+  <text x="800" y="130" font-family="'Courier New',monospace" font-size="12" fill="#888" text-anchor="middle">and edited</text>
+  <text x="800" y="148" font-family="'Courier New',monospace" font-size="12" fill="#888" text-anchor="middle">directly</text>
+
+  <!-- Bottom label -->
+  <text x="450" y="205" font-family="'Courier New',monospace" font-size="11" fill="#555" text-anchor="middle">No magic. No cloud. Just your terminal, your API, your code.</text>
+</svg>

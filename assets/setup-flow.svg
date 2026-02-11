@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 180" width="900" height="180">
+  <rect width="900" height="180" fill="#0a0a0a" rx="12"/>
+
+  <!-- Step 1 -->
+  <circle cx="100" cy="75" r="28" fill="none" stroke="#ff5500" stroke-width="2"/>
+  <text x="100" y="82" font-family="'Courier New',monospace" font-size="22" fill="#ff5500" text-anchor="middle" font-weight="bold">1</text>
+  <text x="100" y="125" font-family="'Courier New',monospace" font-size="11" fill="#aaa" text-anchor="middle">Clone repo</text>
+  <text x="100" y="142" font-family="'Courier New',monospace" font-size="10" fill="#666" text-anchor="middle">git clone ...</text>
+
+  <!-- Arrow -->
+  <line x1="140" y1="75" x2="210" y2="75" stroke="#333" stroke-width="2"/>
+  <polygon points="210,69 225,75 210,81" fill="#333"/>
+
+  <!-- Step 2 -->
+  <circle cx="280" cy="75" r="28" fill="none" stroke="#ff5500" stroke-width="2"/>
+  <text x="280" y="82" font-family="'Courier New',monospace" font-size="22" fill="#ff5500" text-anchor="middle" font-weight="bold">2</text>
+  <text x="280" y="125" font-family="'Courier New',monospace" font-size="11" fill="#aaa" text-anchor="middle">Install</text>
+  <text x="280" y="142" font-family="'Courier New',monospace" font-size="10" fill="#666" text-anchor="middle">python install.py</text>
+
+  <!-- Arrow -->
+  <line x1="320" y1="75" x2="390" y2="75" stroke="#333" stroke-width="2"/>
+  <polygon points="390,69 405,75 390,81" fill="#333"/>
+
+  <!-- Step 3 -->
+  <circle cx="460" cy="75" r="28" fill="none" stroke="#ff5500" stroke-width="2"/>
+  <text x="460" y="82" font-family="'Courier New',monospace" font-size="22" fill="#ff5500" text-anchor="middle" font-weight="bold">3</text>
+  <text x="460" y="125" font-family="'Courier New',monospace" font-size="11" fill="#aaa" text-anchor="middle">Set your API</text>
+  <text x="460" y="142" font-family="'Courier New',monospace" font-size="10" fill="#666" text-anchor="middle">URL + key + model</text>
+
+  <!-- Arrow -->
+  <line x1="500" y1="75" x2="570" y2="75" stroke="#333" stroke-width="2"/>
+  <polygon points="570,69 585,75 570,81" fill="#333"/>
+
+  <!-- Step 4 -->
+  <circle cx="640" cy="75" r="28" fill="none" stroke="#ff5500" stroke-width="2"/>
+  <text x="640" y="82" font-family="'Courier New',monospace" font-size="22" fill="#ff5500" text-anchor="middle" font-weight="bold">4</text>
+  <text x="640" y="125" font-family="'Courier New',monospace" font-size="11" fill="#aaa" text-anchor="middle">Code</text>
+  <text x="640" y="142" font-family="'Courier New',monospace" font-size="10" fill="#666" text-anchor="middle">marauder</text>
+
+  <!-- Arrow -->
+  <line x1="680" y1="75" x2="750" y2="75" stroke="#333" stroke-width="2"/>
+  <polygon points="750,69 765,75 750,81" fill="#333"/>
+
+  <!-- Step 5 -->
+  <circle cx="820" cy="75" r="28" fill="none" stroke="#44cc44" stroke-width="2"/>
+  <text x="820" y="82" font-family="'Courier New',monospace" font-size="22" fill="#44cc44" text-anchor="middle" font-weight="bold">✓</text>
+  <text x="820" y="125" font-family="'Courier New',monospace" font-size="11" fill="#aaa" text-anchor="middle">Done</text>
+  <text x="820" y="142" font-family="'Courier New',monospace" font-size="10" fill="#666" text-anchor="middle">That's it.</text>
+
+  <!-- Bottom -->
+  <text x="450" y="172" font-family="'Courier New',monospace" font-size="10" fill="#444" text-anchor="middle">From zero to coding in under 2 minutes.</text>
+</svg>
