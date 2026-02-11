@@ -25,19 +25,18 @@ EXT_TO_LANG = {
 
 MAX_DISPLAY_LINES = 30
 MAX_HISTORY_MESSAGES = 40
-MAX_TOOL_RESULT_CHARS = 2000
+MAX_TOOL_RESULT_CHARS = 1500
+MAX_OLD_ASSISTANT_CHARS = 500
 
-SYSTEM_PROMPT = """You are Marauder Code, an AI coding assistant running in a CLI.
-You have access to the user's project directory and can read, write, edit files, list directory contents, and run shell commands.
+SYSTEM_PROMPT = """You are Marauder Code, an AI coding assistant in a CLI.
+You can read, write, edit files, list dirs, and run commands in the user's project.
 
 Rules:
-- Always use the tools to interact with files. Never guess file contents.
-- When editing, use edit_file with exact matching strings.
-- Use list_files first to understand the project structure before making changes.
-- Be concise in your explanations. Focus on doing the work.
-- If a task is ambiguous, ask the user to clarify.
-- When creating files, write complete, working code.
-- Keep your text responses short. The user wants results, not essays.
+- Use tools to interact with files. Never guess contents.
+- edit_file needs exact matching strings.
+- list_files first to understand structure.
+- Be concise. Do the work, skip the essays.
+- Write complete, working code.
 """
 
 view_mode = "normal"
@@ -49,31 +48,106 @@ def set_view_mode(mode: str):
 
 
 def _trim_history(history: list) -> list:
+    """Smart history trimming to keep context lean."""
     if len(history) <= MAX_HISTORY_MESSAGES:
         return history
+    # Keep first 2 messages (initial context) + most recent
     keep_start = history[:2]
     keep_end = history[-(MAX_HISTORY_MESSAGES - 2):]
     return keep_start + [{"role": "system", "content": "[Earlier conversation trimmed]"}] + keep_end
 
 
 def _fmt_tokens(n: int) -> str:
-    """Format token count: 1234 -> '1.2k', 12345 -> '12.3k'."""
     if n < 1000:
         return str(n)
     return f"{n / 1000:.1f}k"
 
 
 def _truncate_tool_results(history: list) -> list:
+    """Aggressively compress old messages to save context.
+    
+    - Old tool results (beyond last 6): truncated hard
+    - Old assistant messages: trimmed to summary length
+    - Recent messages (last 6): kept intact
+    """
     result = []
     total = len(history)
+    recent_cutoff = total - 6  # keep last 6 messages fully intact
+
     for i, msg in enumerate(history):
-        if msg.get("role") == "tool" and i < total - 10:
+        if i >= recent_cutoff:
+            result.append(msg)
+            continue
+
+        role = msg.get("role", "")
+
+        if role == "tool":
             content = msg["content"]
             if len(content) > MAX_TOOL_RESULT_CHARS:
                 msg = dict(msg)
-                msg["content"] = content[:MAX_TOOL_RESULT_CHARS] + "\n... (truncated)"
+                # For file reads, just keep first/last few lines
+                lines = content.split("\n")
+                if len(lines) > 20:
+                    kept = lines[:10] + [f"... ({len(lines) - 20} lines omitted) ..."] + lines[-10:]
+                    msg["content"] = "\n".join(kept)
+                else:
+                    msg["content"] = content[:MAX_TOOL_RESULT_CHARS] + "\n... (truncated)"
+
+        elif role == "assistant":
+            content = msg.get("content", "") or ""
+            if len(content) > MAX_OLD_ASSISTANT_CHARS:
+                msg = dict(msg)
+                msg["content"] = content[:MAX_OLD_ASSISTANT_CHARS] + "..."
+
         result.append(msg)
     return result
+
+
+def _extract_content(msg) -> tuple[str, str]:
+    """Extract text content and thinking content from a message.
+    
+    Handles:
+    - Standard string content (most models)
+    - Content blocks with type "thinking"/"text" (Claude extended thinking)
+    - Reasoning_content field (DeepSeek R1, Kimi K2.5)
+    
+    Returns (text_content, thinking_content).
+    """
+    text = ""
+    thinking = ""
+
+    # Check for reasoning_content (DeepSeek, Kimi style)
+    reasoning = getattr(msg, "reasoning_content", None)
+    if reasoning:
+        thinking = reasoning
+
+    # Main content — could be string or list of content blocks
+    content = msg.content
+    if isinstance(content, str):
+        text = content or ""
+    elif isinstance(content, list):
+        # Content blocks (Claude style): [{"type": "thinking", "thinking": "..."}, {"type": "text", "text": "..."}]
+        for block in content:
+            if isinstance(block, dict):
+                block_type = block.get("type", "")
+                if block_type == "thinking":
+                    thinking += block.get("thinking", "")
+                elif block_type == "text":
+                    text += block.get("text", "")
+                else:
+                    text += block.get("text", str(block))
+            elif hasattr(block, "type"):
+                # Object-style blocks from the SDK
+                if block.type == "thinking":
+                    thinking += getattr(block, "thinking", "")
+                elif block.type == "text":
+                    text += getattr(block, "text", "")
+                else:
+                    text += getattr(block, "text", str(block))
+            else:
+                text += str(block)
+
+    return text.strip(), thinking.strip()
 
 
 def run_agent(client: OpenAI, model: str, work_dir: str, user_message: str, history: list) -> list:
@@ -143,7 +217,20 @@ def run_agent(client: OpenAI, model: str, work_dir: str, user_message: str, hist
 
             current_phase = "processing response"
 
-            assistant_msg = {"role": "assistant", "content": msg.content}
+            # Extract text and thinking content
+            text_content, thinking_content = _extract_content(msg)
+
+            # Show thinking in advanced mode
+            if thinking_content and view_mode == "advanced":
+                console.print(Panel(
+                    thinking_content[:500] + ("..." if len(thinking_content) > 500 else ""),
+                    title="💭 Thinking", border_style="dim magenta", expand=False,
+                ))
+            elif thinking_content and use_normal:
+                current_phase = "thinking deeply..."
+
+            # Build history message — only store text, not thinking (saves tokens)
+            assistant_msg = {"role": "assistant", "content": text_content}
             if msg.tool_calls:
                 assistant_msg["tool_calls"] = [
                     {
@@ -156,7 +243,7 @@ def run_agent(client: OpenAI, model: str, work_dir: str, user_message: str, hist
             history.append(assistant_msg)
 
             if not msg.tool_calls:
-                final_content = msg.content
+                final_content = text_content
                 break
 
             for tc in msg.tool_calls:
@@ -190,8 +277,8 @@ def run_agent(client: OpenAI, model: str, work_dir: str, user_message: str, hist
                     "content": result,
                 })
 
-            if msg.content and view_mode == "advanced":
-                console.print(Panel(msg.content, title="Marauder", border_style="cyan"))
+            if text_content and view_mode == "advanced":
+                console.print(Panel(text_content, title="Marauder", border_style="cyan"))
 
     finally:
         ticker_stop.set()
@@ -300,3 +387,42 @@ def _summarize_tool_call(name: str, args: dict) -> str:
         cmd = args.get("command", "")
         return cmd if len(cmd) < 60 else cmd[:60] + "..."
     return str(args)[:80]
+
+
+SUMMARIZE_PROMPT = """Summarize this conversation for context continuity. Include:
+1. What the project is (language, framework, purpose) in 1-2 sentences.
+2. What was accomplished in this session (files created/edited, features built).
+3. What the user was last working on or asked for.
+4. Any important decisions or patterns established.
+
+Be concise. Max 300 words. This summary will be used to continue the conversation in a fresh context."""
+
+
+def summarize_context(client: OpenAI, model: str, history: list) -> str:
+    """Ask the model to summarize the current conversation for compaction."""
+    # Build a condensed version of history for the summary request
+    condensed = []
+    for msg in history:
+        role = msg.get("role", "")
+        content = msg.get("content", "") or ""
+        if role == "user":
+            condensed.append({"role": "user", "content": content[:500]})
+        elif role == "assistant":
+            condensed.append({"role": "assistant", "content": content[:300]})
+        elif role == "tool":
+            # Just mention what tool was called, not the full result
+            condensed.append({"role": "assistant", "content": f"[tool result: {content[:100]}]"})
+
+    messages = [{"role": "system", "content": SUMMARIZE_PROMPT}] + condensed[-30:]
+
+    try:
+        resp = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            max_tokens=500,
+            temperature=0,
+        )
+        text, _ = _extract_content(resp.choices[0].message)
+        return text
+    except Exception as e:
+        return f"(Summary failed: {e})"

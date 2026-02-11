@@ -10,7 +10,7 @@ from prompt_toolkit.history import InMemoryHistory
 from marauder import __version__
 from marauder.config import prompt_config
 from marauder.ai import create_client, test_connection
-from marauder.agent import run_agent, set_view_mode, view_mode
+from marauder.agent import run_agent, set_view_mode, view_mode, summarize_context
 
 console = Console()
 
@@ -31,7 +31,7 @@ BANNER = f"""\
 [/dim italic]"""
 
 
-def _draw_context_wheel(used: int, limit: int):
+def _draw_context_wheel(used: int, limit: int, auto: bool = False, compacts: int = 0):
     """Draw a context usage bar before the prompt."""
     if used == 0 and limit == 0:
         return
@@ -40,7 +40,6 @@ def _draw_context_wheel(used: int, limit: int):
     filled = int(pct * bar_width)
     empty = bar_width - filled
 
-    # Color based on usage
     if pct < 0.5:
         color = "green"
     elif pct < 0.8:
@@ -50,7 +49,10 @@ def _draw_context_wheel(used: int, limit: int):
 
     bar = f"[{color}]{'█' * filled}[/{color}][dim]{'░' * empty}[/dim]"
     label = f"{used / 1000:.1f}k / {limit / 1000:.0f}k"
-    console.print(f"  ctx [{bar}] {label} ({pct:.0%})", highlight=False)
+    extra = ""
+    if auto:
+        extra = f" [dim]• auto {compacts}/3[/dim]"
+    console.print(f"  ctx [{bar}] {label} ({pct:.0%}){extra}", highlight=False)
 
 
 def main():
@@ -100,17 +102,20 @@ def main():
         set_view_mode("normal")
         console.print("  [dim]→ Normal mode.[/dim]\n")
 
-    console.print("  Commands: [cyan]/quit[/cyan]  [cyan]/clear[/cyan]  [cyan]/mode[/cyan] (switch view)\n")
+    console.print("  Commands: [cyan]/quit[/cyan]  [cyan]/clear[/cyan]  [cyan]/mode[/cyan]  [cyan]/auto[/cyan] (auto-compact)\n")
 
     # Chat loop
     history = []
     input_history = InMemoryHistory()
     context_limit = cfg.get("context_limit", 128000)
     cumulative_tokens = 0
+    auto_compact = False
+    compact_count = 0
+    MAX_COMPACTS = 3
 
     while True:
         # Show context wheel
-        _draw_context_wheel(cumulative_tokens, context_limit)
+        _draw_context_wheel(cumulative_tokens, context_limit, auto_compact, compact_count)
 
         try:
             user_input = pt_prompt("you > ", history=input_history).strip()
@@ -126,6 +131,7 @@ def main():
         if user_input.lower() == "/clear":
             history = []
             cumulative_tokens = 0
+            compact_count = 0
             console.print("  [dim]Context cleared.[/dim]")
             continue
         if user_input.lower() == "/mode":
@@ -134,9 +140,36 @@ def main():
             set_view_mode(new_mode)
             console.print(f"  [dim]Switched to {new_mode} mode.[/dim]")
             continue
+        if user_input.lower() == "/auto":
+            auto_compact = not auto_compact
+            state = "ON" if auto_compact else "OFF"
+            console.print(f"  [dim]Auto-compact: {state} (summarizes at 80% context, max {MAX_COMPACTS}x)[/dim]")
+            continue
 
         history, last_prompt_tokens = run_agent(client, model, work_dir, user_input, history)
-        cumulative_tokens = last_prompt_tokens  # prompt_tokens = actual context size sent
+        cumulative_tokens = last_prompt_tokens
+
+        # Auto-compact check
+        if auto_compact and context_limit > 0:
+            pct = cumulative_tokens / context_limit
+            if pct >= 0.8:
+                if compact_count >= MAX_COMPACTS:
+                    console.print()
+                    console.print("  [bold red]⚠ Context compacted 3 times already — quality will degrade beyond this.[/bold red]")
+                    console.print("  [red]  Use /clear to reset, or keep going at your own risk.[/red]")
+                    auto_compact = False
+                else:
+                    compact_count += 1
+                    console.print()
+                    console.print(f"  [yellow]🔄 Context at {pct:.0%} — auto-compacting ({compact_count}/{MAX_COMPACTS})...[/yellow]")
+                    summary = summarize_context(client, model, history)
+                    history = [
+                        {"role": "system", "content": f"[Session summary from auto-compact #{compact_count}]\n{summary}"},
+                    ]
+                    cumulative_tokens = 0
+                    console.print(f"  [green]✓ Context compacted. Fresh start with summary.[/green]")
+                    console.print(Panel(summary, title=f"📋 Summary #{compact_count}", border_style="dim yellow"))
+
         print()  # spacing
 
 

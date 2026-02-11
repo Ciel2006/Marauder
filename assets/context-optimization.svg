@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 750" width="900" height="750">
+  <rect width="900" height="750" fill="#0a0a0a" rx="12"/>
+
+  <!-- Title -->
+  <text x="450" y="38" font-family="'Courier New',monospace" font-size="16" fill="#ff5500" text-anchor="middle" font-weight="bold">Context Optimization — How Marauder Stays Fast</text>
+
+  <!-- Divider -->
+  <line x1="100" y1="55" x2="800" y2="55" stroke="#333" stroke-width="1"/>
+
+  <!-- Left column: The Problem -->
+  <text x="225" y="85" font-family="'Courier New',monospace" font-size="13" fill="#cc6666" text-anchor="middle">Without optimization</text>
+
+  <!-- Bloated context bar -->
+  <rect x="60" y="100" width="330" height="30" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
+  <rect x="60" y="100" width="310" height="30" rx="4" fill="#cc3333" opacity="0.7"/>
+  <text x="225" y="120" font-family="'Courier New',monospace" font-size="11" fill="#fff" text-anchor="middle">████████████████████ 95% full</text>
+
+  <text x="80" y="155" font-family="'Courier New',monospace" font-size="10" fill="#888">• Full file contents in every old message</text>
+  <text x="80" y="172" font-family="'Courier New',monospace" font-size="10" fill="#888">• Thinking/reasoning stored in history</text>
+  <text x="80" y="189" font-family="'Courier New',monospace" font-size="10" fill="#888">• Long assistant responses kept forever</text>
+  <text x="80" y="206" font-family="'Courier New',monospace" font-size="10" fill="#888">• Context fills up after ~3 prompts</text>
+  <text x="80" y="223" font-family="'Courier New',monospace" font-size="10" fill="#cc6666">→ Model loses coherence, edits fail</text>
+
+  <!-- Right column: The Solution -->
+  <text x="675" y="85" font-family="'Courier New',monospace" font-size="13" fill="#44cc44" text-anchor="middle">With Marauder</text>
+
+  <!-- Lean context bar -->
+  <rect x="510" y="100" width="330" height="30" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
+  <rect x="510" y="100" width="100" height="30" rx="4" fill="#44cc44" opacity="0.7"/>
+  <text x="675" y="120" font-family="'Courier New',monospace" font-size="11" fill="#fff" text-anchor="middle">██████░░░░░░░░░░░░░░ 30% used</text>
+
+  <text x="530" y="155" font-family="'Courier New',monospace" font-size="10" fill="#888">• Old tool results compressed</text>
+  <text x="530" y="172" font-family="'Courier New',monospace" font-size="10" fill="#888">• Thinking content stripped from history</text>
+  <text x="530" y="189" font-family="'Courier New',monospace" font-size="10" fill="#888">• Old assistant msgs trimmed to summary</text>
+  <text x="530" y="206" font-family="'Courier New',monospace" font-size="10" fill="#888">• Only last 6 messages kept fully intact</text>
+  <text x="530" y="223" font-family="'Courier New',monospace" font-size="10" fill="#44cc44">→ Stays fast across long sessions</text>
+
+  <!-- Divider -->
+  <line x1="450" y1="80" x2="450" y2="235" stroke="#333" stroke-width="1" stroke-dasharray="4"/>
+
+  <!-- Bottom section: The 5 strategies -->
+  <line x1="100" y1="250" x2="800" y2="250" stroke="#333" stroke-width="1"/>
+  <text x="450" y="278" font-family="'Courier New',monospace" font-size="13" fill="#ff5500" text-anchor="middle">5 Strategies</text>
+
+  <!-- Strategy boxes -->
+  <!-- 1 -->
+  <rect x="40" y="295" width="155" height="100" rx="8" fill="#1a1a1a" stroke="#ff5500" stroke-width="1"/>
+  <text x="117" y="318" font-family="'Courier New',monospace" font-size="11" fill="#ff5500" text-anchor="middle">1. Trim History</text>
+  <text x="117" y="340" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">Keep first 2 + last</text>
+  <text x="117" y="355" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">38 messages max.</text>
+  <text x="117" y="370" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">Old turns dropped.</text>
+
+  <!-- 2 -->
+  <rect x="210" y="295" width="155" height="100" rx="8" fill="#1a1a1a" stroke="#ff5500" stroke-width="1"/>
+  <text x="287" y="318" font-family="'Courier New',monospace" font-size="11" fill="#ff5500" text-anchor="middle">2. Compress Tools</text>
+  <text x="287" y="340" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">Old file reads get</text>
+  <text x="287" y="355" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">first/last 10 lines.</text>
+  <text x="287" y="370" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">Middle cut out.</text>
+
+  <!-- 3 -->
+  <rect x="380" y="295" width="155" height="100" rx="8" fill="#1a1a1a" stroke="#ff5500" stroke-width="1"/>
+  <text x="457" y="318" font-family="'Courier New',monospace" font-size="11" fill="#ff5500" text-anchor="middle">3. Drop Thinking</text>
+  <text x="457" y="340" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">CoT / reasoning</text>
+  <text x="457" y="355" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">never stored in</text>
+  <text x="457" y="370" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">history. Zero waste.</text>
+
+  <!-- 4 -->
+  <rect x="550" y="295" width="155" height="100" rx="8" fill="#1a1a1a" stroke="#ff5500" stroke-width="1"/>
+  <text x="627" y="318" font-family="'Courier New',monospace" font-size="11" fill="#ff5500" text-anchor="middle">4. Trim Replies</text>
+  <text x="627" y="340" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">Old assistant msgs</text>
+  <text x="627" y="355" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">cut to 500 chars.</text>
+  <text x="627" y="370" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">Recent ones intact.</text>
+
+  <!-- 5 -->
+  <rect x="720" y="295" width="155" height="100" rx="8" fill="#1a1a1a" stroke="#ff5500" stroke-width="1"/>
+  <text x="797" y="318" font-family="'Courier New',monospace" font-size="11" fill="#ff5500" text-anchor="middle">5. Lean Prompt</text>
+  <text x="797" y="340" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">System prompt is</text>
+  <text x="797" y="355" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">~80 tokens. No</text>
+  <text x="797" y="370" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">bloat, no fluff.</text>
+
+  <!-- Context wheel preview -->
+  <line x1="100" y1="415" x2="800" y2="415" stroke="#333" stroke-width="1"/>
+  <text x="450" y="443" font-family="'Courier New',monospace" font-size="13" fill="#ff5500" text-anchor="middle">Live Context Meter</text>
+
+  <rect x="150" y="458" width="600" height="24" rx="6" fill="#1a1a1a" stroke="#333" stroke-width="1"/>
+  <rect x="150" y="458" width="180" height="24" rx="6" fill="#44cc44" opacity="0.7"/>
+  <text x="450" y="475" font-family="'Courier New',monospace" font-size="11" fill="#ccc" text-anchor="middle">ctx [██████████░░░░░░░░░░░░░░░░░░░░] 12.4k / 128k (10%) • auto 0/3</text>
+
+  <text x="450" y="505" font-family="'Courier New',monospace" font-size="10" fill="#444" text-anchor="middle">Green &lt;50% • Yellow &lt;80% • Red &gt;80% — /clear to reset</text>
+
+  <!-- Auto-compact section -->
+  <line x1="100" y1="525" x2="800" y2="525" stroke="#333" stroke-width="1"/>
+  <text x="450" y="553" font-family="'Courier New',monospace" font-size="13" fill="#ff5500" text-anchor="middle">Auto-Compact (/auto)</text>
+
+  <!-- Flow diagram: 3 stages -->
+  <!-- Stage 1: 80% hit -->
+  <rect x="55" y="575" width="230" height="90" rx="8" fill="#1a1a1a" stroke="#ccaa44" stroke-width="1.5"/>
+  <text x="170" y="598" font-family="'Courier New',monospace" font-size="11" fill="#ccaa44" text-anchor="middle">Context hits 80%</text>
+  <text x="170" y="618" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">Marauder asks the model</text>
+  <text x="170" y="633" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">to summarize the session:</text>
+  <text x="170" y="648" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">project, work done, last task</text>
+
+  <!-- Arrow -->
+  <line x1="295" y1="620" x2="335" y2="620" stroke="#555" stroke-width="2"/>
+  <polygon points="335,614 350,620 335,626" fill="#555"/>
+
+  <!-- Stage 2: Fresh start -->
+  <rect x="355" y="575" width="230" height="90" rx="8" fill="#1a1a1a" stroke="#44cc44" stroke-width="1.5"/>
+  <text x="470" y="598" font-family="'Courier New',monospace" font-size="11" fill="#44cc44" text-anchor="middle">Fresh context</text>
+  <text x="470" y="618" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">History replaced with</text>
+  <text x="470" y="633" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">summary. Context drops</text>
+  <text x="470" y="648" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">back to ~5%. Keep going.</text>
+
+  <!-- Arrow -->
+  <line x1="595" y1="620" x2="635" y2="620" stroke="#555" stroke-width="2"/>
+  <polygon points="635,614 650,620 635,626" fill="#555"/>
+
+  <!-- Stage 3: Max 3 -->
+  <rect x="655" y="575" width="210" height="90" rx="8" fill="#1a1a1a" stroke="#cc6666" stroke-width="1.5"/>
+  <text x="760" y="598" font-family="'Courier New',monospace" font-size="11" fill="#cc6666" text-anchor="middle">Max 3 compacts</text>
+  <text x="760" y="618" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">After 3 summaries,</text>
+  <text x="760" y="633" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">quality degrades.</text>
+  <text x="760" y="648" font-family="'Courier New',monospace" font-size="9" fill="#888" text-anchor="middle">Use /clear to reset.</text>
+
+  <!-- Compact counter visual -->
+  <text x="450" y="700" font-family="'Courier New',monospace" font-size="11" fill="#888" text-anchor="middle">
+    <tspan fill="#44cc44">●</tspan> compact 1    <tspan fill="#ccaa44">●</tspan> compact 2    <tspan fill="#cc6666">●</tspan> compact 3    <tspan fill="#555">●</tspan> /clear needed
+  </text>
+
+  <!-- Bottom note -->
+  <text x="450" y="735" font-family="'Courier New',monospace" font-size="10" fill="#444" text-anchor="middle">Summaries of summaries lose detail — 3 is the safe limit before coherence drops.</text>
+</svg>
