@@ -56,6 +56,13 @@ def _trim_history(history: list) -> list:
     return keep_start + [{"role": "system", "content": "[Earlier conversation trimmed]"}] + keep_end
 
 
+def _fmt_tokens(n: int) -> str:
+    """Format token count: 1234 -> '1.2k', 12345 -> '12.3k'."""
+    if n < 1000:
+        return str(n)
+    return f"{n / 1000:.1f}k"
+
+
 def _truncate_tool_results(history: list) -> list:
     result = []
     total = len(history)
@@ -79,6 +86,9 @@ def run_agent(client: OpenAI, model: str, work_dir: str, user_message: str, hist
     files_changed = []
     current_phase = "thinking"
     final_content = None
+    total_prompt_tokens = 0
+    total_completion_tokens = 0
+    api_calls = 0
 
     use_normal = view_mode == "normal"
     status_ctx = None
@@ -86,7 +96,7 @@ def run_agent(client: OpenAI, model: str, work_dir: str, user_message: str, hist
 
     def _build_status() -> str:
         elapsed = time.time() - start_time
-        txt = f"  ⚡ Marauder is working  ({elapsed:.0f}s • {tool_count} actions • {current_phase})"
+        txt = f"  ⚡ Marauder is working  ({elapsed:.0f}s • {tool_count} actions • {_fmt_tokens(total_prompt_tokens + total_completion_tokens)} tokens • {current_phase})"
         return txt
 
     # Background thread to tick the timer every second
@@ -124,6 +134,12 @@ def run_agent(client: OpenAI, model: str, work_dir: str, user_message: str, hist
 
             choice = resp.choices[0]
             msg = choice.message
+
+            # Track token usage
+            if resp.usage:
+                total_prompt_tokens += resp.usage.prompt_tokens or 0
+                total_completion_tokens += resp.usage.completion_tokens or 0
+            api_calls += 1
 
             current_phase = "processing response"
 
@@ -184,17 +200,20 @@ def run_agent(client: OpenAI, model: str, work_dir: str, user_message: str, hist
 
     # Final summary
     elapsed = time.time() - start_time
+    total_tokens = total_prompt_tokens + total_completion_tokens
     if use_normal:
         console.print(f"  [green]✓ Done in {elapsed:.1f}s — {tool_count} actions[/green]")
         if files_changed:
             unique = list(dict.fromkeys(files_changed))
             console.print(f"  [dim]Files touched: {', '.join(unique)}[/dim]")
+        if total_tokens > 0:
+            console.print(f"  [dim]Tokens: {_fmt_tokens(total_prompt_tokens)} in / {_fmt_tokens(total_completion_tokens)} out / {_fmt_tokens(total_tokens)} total ({api_calls} API calls)[/dim]")
         console.print()
 
     if final_content:
         console.print(Panel(final_content, title="Marauder", border_style="cyan"))
 
-    return history
+    return history, total_prompt_tokens
 
 
 def _short_action(fn_name: str, args: dict) -> str:

@@ -31,6 +31,28 @@ BANNER = f"""\
 [/dim italic]"""
 
 
+def _draw_context_wheel(used: int, limit: int):
+    """Draw a context usage bar before the prompt."""
+    if used == 0 and limit == 0:
+        return
+    pct = min(used / limit, 1.0) if limit > 0 else 0
+    bar_width = 20
+    filled = int(pct * bar_width)
+    empty = bar_width - filled
+
+    # Color based on usage
+    if pct < 0.5:
+        color = "green"
+    elif pct < 0.8:
+        color = "yellow"
+    else:
+        color = "red"
+
+    bar = f"[{color}]{'█' * filled}[/{color}][dim]{'░' * empty}[/dim]"
+    label = f"{used / 1000:.1f}k / {limit / 1000:.0f}k"
+    console.print(f"  ctx [{bar}] {label} ({pct:.0%})", highlight=False)
+
+
 def main():
     console.print(BANNER)
     console.print()
@@ -80,11 +102,16 @@ def main():
 
     console.print("  Commands: [cyan]/quit[/cyan]  [cyan]/clear[/cyan]  [cyan]/mode[/cyan] (switch view)\n")
 
-    # Step 4: Chat loop
+    # Chat loop
     history = []
     input_history = InMemoryHistory()
+    context_limit = cfg.get("context_limit", 128000)
+    cumulative_tokens = 0
 
     while True:
+        # Show context wheel
+        _draw_context_wheel(cumulative_tokens, context_limit)
+
         try:
             user_input = pt_prompt("you > ", history=input_history).strip()
         except (EOFError, KeyboardInterrupt):
@@ -98,6 +125,7 @@ def main():
             break
         if user_input.lower() == "/clear":
             history = []
+            cumulative_tokens = 0
             console.print("  [dim]Context cleared.[/dim]")
             continue
         if user_input.lower() == "/mode":
@@ -107,7 +135,8 @@ def main():
             console.print(f"  [dim]Switched to {new_mode} mode.[/dim]")
             continue
 
-        history = run_agent(client, model, work_dir, user_input, history)
+        history, last_prompt_tokens = run_agent(client, model, work_dir, user_input, history)
+        cumulative_tokens = last_prompt_tokens  # prompt_tokens = actual context size sent
         print()  # spacing
 
 

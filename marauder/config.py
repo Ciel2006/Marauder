@@ -31,12 +31,15 @@ def load_config() -> dict | None:
     return None
 
 
-def save_config(base_url: str, api_key: str, model: str):
+def save_config(base_url: str, api_key: str, model: str, context_limit: int = 128000):
     """Save config to disk."""
     path = _get_config_path()
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     with open(path, "w") as f:
-        json.dump({"base_url": base_url, "api_key": api_key, "model": model}, f, indent=2)
+        json.dump({
+            "base_url": base_url, "api_key": api_key,
+            "model": model, "context_limit": context_limit,
+        }, f, indent=2)
 
 
 def prompt_config() -> dict:
@@ -57,6 +60,8 @@ def prompt_config() -> dict:
     base_url = pt_prompt("  API Base URL (e.g. https://api.openai.com/v1): ").strip()
     api_key = pt_prompt("  API Key: ", is_password=True).strip()
     model = pt_prompt("  Model ID (e.g. gpt-4o, claude-3-opus): ").strip()
+    ctx_input = pt_prompt("  Context window size in tokens [128000]: ").strip()
+    context_limit = int(ctx_input) if ctx_input.isdigit() else 128000
 
     # Ask where to save
     default = _get_config_path()
@@ -69,7 +74,7 @@ def prompt_config() -> dict:
             custom_path = os.path.join(custom_path, "marauder_config.json")
         _set_config_path(custom_path)
 
-    cfg = {"base_url": base_url, "api_key": api_key, "model": model}
+    cfg = {"base_url": base_url, "api_key": api_key, "model": model, "context_limit": context_limit}
     save_config(**cfg)
     print(f"  [saved to {_get_config_path()}]")
     return cfg
