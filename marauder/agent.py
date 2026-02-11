@@ -24,12 +24,13 @@ EXT_TO_LANG = {
 }
 
 MAX_DISPLAY_LINES = 30
-MAX_HISTORY_MESSAGES = 40
-MAX_TOOL_RESULT_CHARS = 1500
-MAX_OLD_ASSISTANT_CHARS = 500
+MAX_HISTORY_MESSAGES = 30
+MAX_TOOL_RESULT_CHARS = 800
+MAX_OLD_ASSISTANT_CHARS = 300
+MAX_TOOL_ARGS_CHARS = 200  # truncate old tool_call arguments (write_file content etc.)
 
 SYSTEM_PROMPT = """You are Marauder Code, an AI coding assistant in a CLI.
-You can read, write, edit files, list dirs, and run commands in the user's project.
+You can read, write, edit files, list dirs, run commands, and manage background processes.
 
 Rules:
 - Use tools to interact with files. Never guess contents.
@@ -37,6 +38,20 @@ Rules:
 - list_files first to understand structure.
 - Be concise. Do the work, skip the essays.
 - Write complete, working code.
+- IMPORTANT: Be token-efficient. Don't re-read files you just wrote. Don't repeat yourself.
+- After writing a file, you already know its contents — move on to the next task.
+- Keep responses short. No need to explain what you're about to do — just do it.
+
+Running & Testing Code:
+- For short commands (install, build, lint, test): use run_command.
+- For long-running processes (dev servers, watchers like 'npm run dev', 'python app.py', 'flask run'):
+  use run_background to launch them, then check the initial output.
+- After launching with run_background, check if it started OK:
+  - If the output shows errors or the process crashed → read the error, fix the code, and try again.
+  - If it started successfully → use check_background later to see new logs if needed.
+- When you're done testing, use stop_background to clean up running processes.
+- Use list_background to see all active processes.
+- When all tasks are complete, provide a brief project summary of what was built/fixed.
 """
 
 view_mode = "normal"
@@ -51,10 +66,10 @@ def _trim_history(history: list) -> list:
     """Smart history trimming to keep context lean."""
     if len(history) <= MAX_HISTORY_MESSAGES:
         return history
-    # Keep first 2 messages (initial context) + most recent
-    keep_start = history[:2]
-    keep_end = history[-(MAX_HISTORY_MESSAGES - 2):]
-    return keep_start + [{"role": "system", "content": "[Earlier conversation trimmed]"}] + keep_end
+    # Keep first message (initial user request) + most recent messages
+    keep_start = history[:1]
+    keep_end = history[-(MAX_HISTORY_MESSAGES - 1):]
+    return keep_start + [{"role": "system", "content": "[Earlier conversation trimmed for context efficiency]"}] + keep_end
 
 
 def _fmt_tokens(n: int) -> str:
@@ -66,13 +81,15 @@ def _fmt_tokens(n: int) -> str:
 def _truncate_tool_results(history: list) -> list:
     """Aggressively compress old messages to save context.
     
-    - Old tool results (beyond last 6): truncated hard
-    - Old assistant messages: trimmed to summary length
-    - Recent messages (last 6): kept intact
+    Key optimizations:
+    - Old tool results: truncated hard
+    - Old assistant messages: text trimmed, tool_call arguments compressed
+      (this is the big one — write_file arguments carry full file content!)
+    - Recent messages (last 4): kept intact for current task continuity
     """
     result = []
     total = len(history)
-    recent_cutoff = total - 6  # keep last 6 messages fully intact
+    recent_cutoff = total - 4  # only keep last 4 messages fully intact
 
     for i, msg in enumerate(history):
         if i >= recent_cutoff:
@@ -82,22 +99,57 @@ def _truncate_tool_results(history: list) -> list:
         role = msg.get("role", "")
 
         if role == "tool":
-            content = msg["content"]
+            content = msg.get("content", "")
             if len(content) > MAX_TOOL_RESULT_CHARS:
                 msg = dict(msg)
-                # For file reads, just keep first/last few lines
                 lines = content.split("\n")
-                if len(lines) > 20:
-                    kept = lines[:10] + [f"... ({len(lines) - 20} lines omitted) ..."] + lines[-10:]
-                    msg["content"] = "\n".join(kept)
+                if len(lines) > 10:
+                    kept = lines[:5] + [f"... ({len(lines) - 10} lines omitted) ..."] + lines[-5:]
+                    msg["content"] = "\n".join(kept)[:MAX_TOOL_RESULT_CHARS]
                 else:
-                    msg["content"] = content[:MAX_TOOL_RESULT_CHARS] + "\n... (truncated)"
+                    msg["content"] = content[:MAX_TOOL_RESULT_CHARS] + "...(truncated)"
 
         elif role == "assistant":
+            msg = dict(msg)
+            # Trim text content
             content = msg.get("content", "") or ""
             if len(content) > MAX_OLD_ASSISTANT_CHARS:
-                msg = dict(msg)
                 msg["content"] = content[:MAX_OLD_ASSISTANT_CHARS] + "..."
+
+            # Compress tool_call arguments — this is where write_file content hides
+            if "tool_calls" in msg and msg["tool_calls"]:
+                compressed_calls = []
+                for tc in msg["tool_calls"]:
+                    tc = dict(tc)
+                    fn = tc.get("function", {})
+                    fn = dict(fn)
+                    fn_name = fn.get("name", "")
+                    args_str = fn.get("arguments", "")
+
+                    # For write_file, replace content with a short summary
+                    if fn_name == "write_file" and len(args_str) > MAX_TOOL_ARGS_CHARS:
+                        try:
+                            args = json.loads(args_str)
+                            content_len = len(args.get("content", ""))
+                            args["content"] = f"[{content_len} chars written]"
+                            fn["arguments"] = json.dumps(args)
+                        except Exception:
+                            fn["arguments"] = args_str[:MAX_TOOL_ARGS_CHARS] + "..."
+                    # For edit_file, compress old_str/new_str
+                    elif fn_name == "edit_file" and len(args_str) > MAX_TOOL_ARGS_CHARS:
+                        try:
+                            args = json.loads(args_str)
+                            args["old_str"] = args.get("old_str", "")[:60] + "..."
+                            args["new_str"] = args.get("new_str", "")[:60] + "..."
+                            fn["arguments"] = json.dumps(args)
+                        except Exception:
+                            fn["arguments"] = args_str[:MAX_TOOL_ARGS_CHARS] + "..."
+                    elif len(args_str) > MAX_TOOL_ARGS_CHARS:
+                        fn["arguments"] = args_str[:MAX_TOOL_ARGS_CHARS] + "..."
+
+                    tc["function"] = fn
+                    compressed_calls.append(tc)
+                msg["tool_calls"] = compressed_calls
 
         result.append(msg)
     return result
@@ -268,6 +320,14 @@ def run_agent(client: OpenAI, model: str, work_dir: str, user_message: str, hist
 
                 result = execute_tool(work_dir, fn_name, fn_args)
 
+                # Cap tool results immediately to prevent bloat
+                if len(result) > 3000:
+                    lines = result.split("\n")
+                    if len(lines) > 30:
+                        result = "\n".join(lines[:15]) + f"\n... ({len(lines) - 30} lines omitted) ...\n" + "\n".join(lines[-15:])
+                    else:
+                        result = result[:3000] + "\n...(output truncated)"
+
                 if view_mode == "advanced":
                     _display_tool_result(fn_name, parsed, result)
 
@@ -315,6 +375,14 @@ def _short_action(fn_name: str, args: dict) -> str:
         return "listing files"
     if fn_name == "run_command":
         return f"running {args.get('command', '')[:30]}"
+    if fn_name == "run_background":
+        return f"launching {args.get('command', '')[:30]}"
+    if fn_name == "check_background":
+        return f"checking process {args.get('pid', '?')}"
+    if fn_name == "stop_background":
+        return f"stopping process {args.get('pid', '?')}"
+    if fn_name == "list_background":
+        return "listing processes"
     return fn_name
 
 
@@ -369,6 +437,25 @@ def _display_tool_result(fn_name: str, args: dict, result: str):
             display_text += f"\n... ({total - MAX_DISPLAY_LINES} more lines)"
         console.print(Panel(display_text, title=f"$ {args.get('command', '')}", border_style="dim white", expand=False))
 
+    elif fn_name == "run_background":
+        lines = result.split("\n")
+        total = len(lines)
+        display_text = "\n".join(lines[:MAX_DISPLAY_LINES])
+        if total > MAX_DISPLAY_LINES:
+            display_text += f"\n... ({total - MAX_DISPLAY_LINES} more lines)"
+        console.print(Panel(display_text, title=f"🚀 bg: {args.get('command', '')}", border_style="dim magenta", expand=False))
+
+    elif fn_name in ("check_background", "list_background"):
+        lines = result.split("\n")
+        total = len(lines)
+        display_text = "\n".join(lines[:MAX_DISPLAY_LINES])
+        if total > MAX_DISPLAY_LINES:
+            display_text += f"\n... ({total - MAX_DISPLAY_LINES} more lines)"
+        console.print(Panel(display_text, title=f"📡 process status", border_style="dim cyan", expand=False))
+
+    elif fn_name == "stop_background":
+        console.print(f"  [yellow]→ {result}[/yellow]")
+
     else:
         display = result if len(result) < 300 else result[:300] + "..."
         console.print(f"  [dim]→ {display}[/dim]")
@@ -386,6 +473,15 @@ def _summarize_tool_call(name: str, args: dict) -> str:
     if name == "run_command":
         cmd = args.get("command", "")
         return cmd if len(cmd) < 60 else cmd[:60] + "..."
+    if name == "run_background":
+        cmd = args.get("command", "")
+        return cmd if len(cmd) < 60 else cmd[:60] + "..."
+    if name == "check_background":
+        return f"PID {args.get('pid', '?')}"
+    if name == "stop_background":
+        return f"PID {args.get('pid', '?')}"
+    if name == "list_background":
+        return ""
     return str(args)[:80]
 
 
